@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 )
@@ -66,38 +67,38 @@ where <config> is a JSON configuration of the semester
 	}
 
 	log.Default().Printf("Starting to generate directories for %s", *s)
-	err = generate(s)
-	if err != nil {
-		fmt.Println(fmt.Errorf("gensemester: error while generating: %v", err))
-		return
+	dirs := generate(s)
+	for _, d := range dirs {
+		err := os.Mkdir(d, os.ModePerm)
+		if err != nil {
+			fmt.Printf("gensemester: error while generating: %v", err)
+			os.Exit(1)
+			return
+		}
+
+		log.Default().Printf("Generated directory %s\n", d)
 	}
+
 	log.Default().Println("Finished generating")
 }
 
-func generate(s *Semester) error {
-	root, err := mkdir(".", fmt.Sprintf("%s_%s_%s", s.Name, strings.Join(s.Years, "_"), s.Type))
-	if err != nil {
-		return err
-	}
+func generate(s *Semester) []string {
+	dirs := make([]string, 0)
+
+	root := path.Join(".", fmt.Sprintf("%s_%s_%s", s.Name, strings.Join(s.Years, "_"), s.Type))
+	dirs = append(dirs, root)
 
 	ws := regexp.MustCompile(`\s{1,}`)
 	for _, c := range s.Courses {
-		cDir, err := mkdir(*root, fmt.Sprintf("%s_%s_%s", c.Abbreviation, ws.ReplaceAllString(c.Name, "_"), c.Teacher))
-		if err != nil {
-			return err
-		}
+		courseDir := path.Join(root, fmt.Sprintf("%s_%s_%s", c.Abbreviation, ws.ReplaceAllString(c.Name, "_"), c.Teacher))
+		dirs = append(dirs, courseDir)
 
 		for _, folder := range subFolders {
-			_, err = mkdir(*cDir, folder)
-			if err != nil {
-				return err
-			}
+			dirs = append(dirs, path.Join(courseDir, folder))
 		}
-
-		log.Default().Printf("Generated directory for %s", c.Abbreviation)
 	}
 
-	return nil
+	return dirs
 }
 
 // mkdir creates a new directory with name inside the specified path.
