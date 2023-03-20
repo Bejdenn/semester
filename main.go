@@ -100,14 +100,3 @@ func generate(s *Semester) []string {
 
 	return dirs
 }
-
-// mkdir creates a new directory with name inside the specified path.
-func mkdir(path, name string) (*string, error) {
-	dir := path + "/" + name
-	err := os.Mkdir(dir, os.ModePerm)
-	if err != nil {
-		return nil, fmt.Errorf("could not make directory with name %s: %v", name, err)
-	}
-
-	return &dir, nil
-}
