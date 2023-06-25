@@ -1,3 +1,3 @@
 module github.com/Bejdenn/gensemester
 
-go 1.17
+go 1.20
