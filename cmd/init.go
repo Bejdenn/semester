@@ -42,13 +42,21 @@ type Semester struct {
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Initialize a new semester directory structure",
+	Long: `Initialize a new semester directory structure. The command takes a config file as input.
+The config file must be a JSON file with the following structure:
+{
+	"name": "Name of the semester",
+	"years": ["2021", "2022"],
+	"type": "WiSe or SoSe",
+	"courses": [
+		{
+			"name": "Name of the course",
+			"abbreviation": "Abbreviation of the course",
+			"teacher": "Name of the teacher"
+		}
+	]
+}`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, err := os.ReadFile(cmd.Flag("config").Value.String())
 		if err != nil {
@@ -146,13 +154,6 @@ func containsBlank(list []string) bool {
 func init() {
 	rootCmd.AddCommand(initCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// initCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
 	initCmd.Flags().StringP("config", "c", "", "Path pointing to a config file")
+	initCmd.MarkFlagRequired("config")
 }
